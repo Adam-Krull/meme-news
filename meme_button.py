@@ -152,7 +152,7 @@ def get_meme_desc(titles, day=today):
 
 def get_meme_image(prompt):
     
-    new_prompt = 'Use a dark background to create an image according to the following prompt: ' + prompt
+    new_prompt = 'Create an image with a darker background according to this prompt: ' + prompt
     
     try:
     
