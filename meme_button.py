@@ -1,3 +1,4 @@
+#Imports
 import re
 import requests
 import openai
@@ -6,30 +7,47 @@ import os
 import time
 import json
 
+#Import keys from my environment file
 from env import API_KEY, OPENAI_API_KEY, MEME_KEY
 
+#Set the openai key
 openai.api_key = OPENAI_API_KEY
 
+#Declare the host of the meme generation api
 host = "ronreiter-meme-generator.p.rapidapi.com"
 
+#Set the headers for requests
 gen_headers = {
     'X-RapidAPI-Key': MEME_KEY,
     'X-RapidAPI-Host': host
     }
 
+#Get today's date and format as year-month-day
 today = datetime.date.today().strftime('%Y-%m-%d')
 
+#Declare the filepath for meme descriptions
+#Not included in the program yet
 descriptions = os.path.join(today, 'descriptions.json')
 
 
+#Make a new folder for today's date
 def make_folder(day=today):
+    
+    """Creates a folder using today's date."""
     
     os.mkdir(day)
     
     print(f'Folder created for today: {day}.')
     
-    
+
+#Save the list of headlines
 def save_headlines(headlines, date=today):
+    
+    """Saves the breaking news headlines to a JSON file.
+    
+    The filename will be a combination of today's date and 'headlines.json'.
+    
+    Prints out how many headlines were successfully used to generate prompts and stored."""
     
     filename = 'headlines.json'
     
@@ -42,7 +60,14 @@ def save_headlines(headlines, date=today):
     print(f'Headline retrieval complete! Retrieved and stored {len(headlines)} headlines.')    
 
 
+#Retrieve a list of headlines from the news api
 def get_headlines(key=API_KEY):
+    
+    """Retrieves the latest breaking news headlines from the news api.
+    
+    Uses regex to remove the source from the end of the headline.
+    
+    Returns a list of headlines to be fed into ChatGPT for meme creation."""
     
     url = f"https://newsapi.org/v2/top-headlines?country=us&apiKey={key}"
     
@@ -69,16 +94,24 @@ def get_headlines(key=API_KEY):
     return titles
 
 
+#Extract the image description, top text, and bottom text from ChatGPT's response
 def extract(text):
+    
+    """Extracts text based on the format of the response from ChatGPT."""
     
     regexp = r"^.*?:\s(.*)"
     
     return re.search(regexp, text).groups()[0]
 
 
+#Use regex to clean and extract text from ChatGPT's response
 def clean_content(content):
     
-    clean_content = re.sub(r"[^a-zA-Z0-9':\s\.]", "", content)
+    """Uses regex to clean the text and substitute Donald Trump to avoid safety filters.
+    
+    Returns a dictionary containing: the image description, the top text, and the bottom text."""
+    
+    clean_content = re.sub(r"[^a-zA-Z0-9':\s\.!]", "", content)
     
     clean_content = re.sub(r"Donald Trump", "a man made of oranges", clean_content)
     
@@ -95,7 +128,14 @@ def clean_content(content):
         return None
 
 
+#Generate meme descriptions from breaking headlines
 def get_meme_desc(titles, day=today):
+    
+    """Asks ChatGPT to describe a meme.
+    
+    Includes try/except logic in case the response is unexpected.
+    
+    Returns a list of dictionaries, each dictionary containing the image description, top text, and bottom text."""
     
     model = 'gpt-3.5-turbo'
     
@@ -150,7 +190,12 @@ def get_meme_desc(titles, day=today):
     return descs
 
 
+#Generate a meme image using DALL-E
 def get_meme_image(prompt):
+    
+    """Feeds the image description to the DALL-E model.
+    
+    Returns the image if one was created, otherwise None."""
     
     new_prompt = 'Create an image with a darker background according to this prompt: ' + prompt
     
@@ -169,7 +214,10 @@ def get_meme_image(prompt):
         return None
 
 
+#Save the generated image    
 def save_image(image, num, date=today):
+    
+    """Saves the DALL-E image to the local filesystem."""
     
     now = round(time.time())
     
@@ -184,7 +232,12 @@ def save_image(image, num, date=today):
     return path    
 
 
+#Upload the generated image to the meme generation api
 def upload_image(path, headers=gen_headers):
+    
+    """Uploads the generated image to the meme generation API.
+    
+    Returns the name of the image if the upload was successful, otherwise None."""
     
     upload_url = "https://ronreiter-meme-generator.p.rapidapi.com/images"
     
@@ -205,7 +258,12 @@ def upload_image(path, headers=gen_headers):
         return None
 
 
+#Generate a meme using the text and uploaded image    
 def generate_meme(image, top, bottom, headers=gen_headers):
+    
+    """Generates a meme using the meme generation API.
+    
+    Returns the generated meme."""
     
     gen_url = "https://ronreiter-meme-generator.p.rapidapi.com/meme"
     
@@ -215,8 +273,13 @@ def generate_meme(image, top, bottom, headers=gen_headers):
     
     return response.content
     
-    
+
+#Save the meme    
 def save_meme(image, num, date=today):
+    
+    """Saves the image to a unique filename.
+    
+    Returns the path to the file."""
     
     now = round(time.time())
     
@@ -230,8 +293,15 @@ def save_meme(image, num, date=today):
         
     return path    
 
-        
+
+#Execute the pipeline from folder to meme creation
 def meme_button(desc=descriptions):
+    
+    """Pipeline function that calls all other functions in this document.
+    
+    Begins by creating a folder unique to the current day.
+    
+    Ends by saving each successfully generated meme to the folder."""
     
     make_folder()
     
@@ -281,12 +351,16 @@ def meme_button(desc=descriptions):
               
             continue
         
-        
+
+#Not sure why I did this lol        
 def main():
+    
+    """xddd"""
     
     meme_button()
     
-    
+
+#Script    
 if __name__ == '__main__':
     
     main()
