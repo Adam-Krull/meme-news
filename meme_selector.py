@@ -38,12 +38,18 @@ def extract_memes(file_list):
 
             continue
 
+    print(f'Located {len(meme_list)} memes.')    
+
     return meme_list
 
 #Display the meme image in a new window
-def display_image(filepath):
+def display_image(filepath, filename, headlines):
 
     """Displays the image located at the specified filepath."""
+
+    headline_index = extract_index(filename)
+
+    print(headlines[headline_index])
 
     img = Image.open(filepath)
 
@@ -118,7 +124,7 @@ def judge_memes(file_list=today_memes, day=today, headlines=headline_text):
 
         meme_path = os.path.join(day, meme)
 
-        display_image(meme_path)
+        display_image(meme_path, meme, headlines)
 
         if approved():
 

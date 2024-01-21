@@ -57,7 +57,7 @@ def save_headlines(headlines, date=today):
         
         json.dump(headlines, f)
         
-    print(f'Headline retrieval complete! Retrieved and stored {len(headlines)} headlines.')    
+    print(f'Meme descriptions complete! Stored {len(headlines)} headlines.')    
 
 
 #Retrieve a list of headlines from the news api
@@ -319,7 +319,7 @@ def meme_button(desc=descriptions):
     
     for i, desc in enumerate(descriptions):
         
-        if (i + 1) % 5 == 0:
+        if i % 5 == 0:
             
             print(f'Feeling sleepy.')
             
@@ -350,6 +350,8 @@ def meme_button(desc=descriptions):
         else:
               
             continue
+
+    print('Meme generation complete!')    
         
 
 #Not sure why I did this lol        
