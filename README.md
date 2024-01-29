@@ -1,6 +1,6 @@
 # Meme news
 
-This project automates the generation of memes from recent news headlines. The memes, along with their corresponding headlines, are tweeted to my (X account)[https://twitter.com/DodgyWaters]. The project relies on a number of APIs to accomplish these tasks.
+This project automates the generation of memes from recent news headlines. The memes, along with their corresponding headlines, are tweeted to my [X account](https://twitter.com/DodgyWaters). The project relies on a number of APIs to accomplish these tasks.
 
 ### APIs
 
@@ -18,7 +18,7 @@ This project automates the generation of memes from recent news headlines. The m
 5. Os: created filepaths.
 6. Time: retrieved the current time in unix timestamp for unique file names.
 7. Json: read and wrote headlines to json files.
-8. (Tweepy)[https://docs.tweepy.org/en/stable/index.html]: post content to X.
+8. [Tweepy](https://docs.tweepy.org/en/stable/index.html): post content to X.
 9. An env file in the same working directory as the script with the following variables:
     - API_KEY: for the News API.
     - OPENAI_API_KEY: for the openai API.
