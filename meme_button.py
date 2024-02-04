@@ -178,6 +178,10 @@ def get_meme_desc(titles, day=today):
         else:
               
             print(f'Unable to generate meme for the following title: {title}.')
+
+            print('Response content looked like this:')
+
+            print(response_content)
             
             continue
             
