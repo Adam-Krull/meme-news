@@ -72,7 +72,7 @@ def curate_content(headline):
     
     Returns a string with additional hashtags."""
 
-    hashtags = ' #currentevents #memenews'
+    hashtags = ' #currentevents #memenews #ai'
 
     return headline + hashtags
 
