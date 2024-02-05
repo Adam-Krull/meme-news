@@ -40,40 +40,40 @@ def make_folder(day=today):
     print(f'Folder created for today: {day}.')
     
 
-#Save the list of headlines
-def save_headlines(headlines, date=today):
+#Save the list of article information
+def save_articles(articles, date=today):
     
-    """Saves the breaking news headlines to a JSON file.
+    """Saves the breaking news articles to a JSON file.
     
-    The filename will be a combination of today's date and 'headlines.json'.
+    The filename will be a combination of today's date and 'articles.json'.
     
-    Prints out how many headlines were successfully used to generate prompts and stored."""
+    Prints out how many articles were successfully used to generate prompts and stored."""
     
-    filename = 'headlines.json'
+    filename = 'articles.json'
     
     path = os.path.join(date, filename)
     
     with open(path, 'w') as f:
         
-        json.dump(headlines, f)
+        json.dump(articles, f)
         
-    print(f'Meme descriptions complete! Stored {len(headlines)} headlines.')    
+    print(f'Meme descriptions complete! Stored {len(articles)} articles.')    
 
 
 #Retrieve a list of headlines from the news api
-def get_headlines(key=API_KEY):
+def get_articles(key=API_KEY):
     
-    """Retrieves the latest breaking news headlines from the news api.
+    """Retrieves the latest breaking news articles from the news api.
     
-    Uses regex to remove the source from the end of the headline.
+    Uses regex to remove the source from the end of the title.
     
-    Returns a list of headlines to be fed into ChatGPT for meme creation."""
+    Returns a JSON object of article information to be fed into ChatGPT for meme creation."""
     
     url = f"https://newsapi.org/v2/top-headlines?country=us&apiKey={key}"
     
     response = requests.get(url)
     
-    titles = []
+    articles = []
     
     regexp = r"^(.*?)\s\-\s.{0,25}$"
     
@@ -81,7 +81,15 @@ def get_headlines(key=API_KEY):
         
         try:
         
-            titles.append(re.search(regexp, article['title']).groups()[0])
+            title = re.search(regexp, article['title']).groups()[0]
+
+            source = article['source']['name']
+
+            link = article['url']
+
+            info_dict = {'title': title, 'source': source, 'link': link}
+
+            articles.append(info_dict)
             
         except:
             
@@ -89,9 +97,9 @@ def get_headlines(key=API_KEY):
             
             continue
             
-    print('All headlines retrieved! Moving on to descriptions..')        
+    print('All articles retrieved! Moving on to descriptions..')        
         
-    return titles
+    return articles
 
 
 #Extract the image description, top text, and bottom text from ChatGPT's response
@@ -113,7 +121,7 @@ def clean_content(content):
     
     clean_content = re.sub(r"[^a-zA-Z0-9':\s\.!]", "", content)
     
-    clean_content = re.sub(r"Donald Trump", "a man made of oranges", clean_content)
+    clean_content = re.sub(r"Donald Trump", "an orange man", clean_content)
     
     try:
         
@@ -129,7 +137,7 @@ def clean_content(content):
 
 
 #Generate meme descriptions from breaking headlines
-def get_meme_desc(titles, day=today):
+def get_meme_desc(articles):
     
     """Asks ChatGPT to describe a meme.
     
@@ -139,13 +147,13 @@ def get_meme_desc(titles, day=today):
     
     model = 'gpt-3.5-turbo'
     
-    app_titles = []
+    used_articles = []
     
     descs = []
     
-    for i, title in enumerate(titles):
+    for i, article in enumerate(articles):
         
-        user_content = f"""Come up with a funny and concise meme about the following headline: {title}.
+        user_content = f"""Come up with a funny and concise meme about the following headline: {article['title']}.
 
                            Format your response like this:
                    
@@ -157,13 +165,13 @@ def get_meme_desc(titles, day=today):
         try:
             
             response = openai.ChatCompletion.create(model=model,
-                                                messages=[{'role': 'user', 'content': user_content}])
+                                                    messages=[{'role': 'user', 'content': user_content}])
         
             response_content = response['choices'][0]['message']['content']
             
         except:
             
-            print('No response received from OpenAI. Continuing to the next headline.')
+            print('No response received from OpenAI. Continuing to the next article.')
             
             continue
         
@@ -171,13 +179,13 @@ def get_meme_desc(titles, day=today):
         
         if content:
             
-            app_titles.append(title)
+            used_articles.append(article)
         
             descs.append(content)
             
         else:
               
-            print(f'Unable to generate meme for the following title: {title}.')
+            print(f'Unable to generate meme for the following title: {article['title']}.')
 
             print('Response content looked like this:')
 
@@ -188,8 +196,10 @@ def get_meme_desc(titles, day=today):
         if (i + 1) % 5 == 0:
         
             print(f'{i + 1} descriptions retrieved.')
+
+        time.sleep(1)    
             
-    save_headlines(app_titles)         
+    save_articles(used_articles)         
         
     return descs
 
@@ -309,7 +319,7 @@ def meme_button(desc=descriptions):
     
     make_folder()
     
-    titles = get_headlines()
+    titles = get_articles()
     
     if os.path.exists(desc):
         
@@ -322,12 +332,6 @@ def meme_button(desc=descriptions):
         descriptions = get_meme_desc(titles)
     
     for i, desc in enumerate(descriptions):
-        
-        if i % 5 == 0:
-            
-            print(f'Feeling sleepy.')
-            
-            time.sleep(66)
         
         image = get_meme_image(desc['image'])
               
@@ -354,6 +358,12 @@ def meme_button(desc=descriptions):
         else:
               
             continue
+
+        if i % 5 == 0:
+            
+            print(f'Feeling sleepy.')
+            
+            time.sleep(66)
 
     print('Meme generation complete!')    
         

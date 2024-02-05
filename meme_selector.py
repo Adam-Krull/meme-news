@@ -12,12 +12,12 @@ today = datetime.date.today().strftime('%Y-%m-%d')
 #Create a list of all files in the folder with today's date
 today_memes = os.listdir(today)
 
-#Establish path to headlines
-headlines = os.path.join(today, 'headlines.json')
+#Establish path to articles
+articles = os.path.join(today, 'articles.json')
 
-#Load in headlines
-with open(headlines, 'r') as f:
-    headline_text = json.load(f)
+#Load in articles
+with open(articles, 'r') as f:
+    article_info = json.load(f)
 
 #Extract meme filenames
 def extract_memes(file_list):
@@ -43,13 +43,13 @@ def extract_memes(file_list):
     return meme_list
 
 #Display the meme image in a new window
-def display_image(filepath, filename, headlines):
+def display_image(filepath, filename, articles):
 
     """Displays the image located at the specified filepath."""
 
-    headline_index = extract_index(filename)
+    article_index = extract_index(filename)
 
-    print(headlines[headline_index])
+    print(articles[article_index]['title'])
 
     img = Image.open(filepath)
 
@@ -82,7 +82,7 @@ def approved():
 
 
 
-#Extract index position for headline
+#Extract index position for article
 def extract_index(meme_file):
 
     """Takes in the name of a meme file.
@@ -105,16 +105,18 @@ def save_approved(day, approved):
     with open(filepath, 'w') as f:
         json.dump(approved, f)
 
+    print(f'{len(approved)} total memes approved.')    
+
     print(f'JSON object of approved memes saved here: {filepath}.')    
 
 #Pipeline function
-def judge_memes(file_list=today_memes, day=today, headlines=headline_text):
+def judge_memes(file_list=today_memes, day=today, articles=article_info):
 
-    """Ingests a list of filenames and a JSON object containing breaking headlines.
+    """Ingests a list of filenames and a JSON object containing breaking news articles.
     
     Identifies the meme images and asks the user for approval.
     
-    Outputs a JSON object with approved meme filepaths and headlines."""
+    Outputs a JSON object containing approved meme filepaths and the article information."""
 
     meme_list = extract_memes(file_list)
 
@@ -124,17 +126,17 @@ def judge_memes(file_list=today_memes, day=today, headlines=headline_text):
 
         meme_path = os.path.join(day, meme)
 
-        display_image(meme_path, meme, headlines)
+        display_image(meme_path, meme, articles)
 
         if approved():
 
-            headline_index = extract_index(meme)
+            article_index = extract_index(meme)
 
-            headline = headlines[headline_index]
+            article = articles[article_index]
 
-            entry = {'headline': headline, 'image': meme_path}
+            article['image'] = meme_path
 
-            approved_list.append(entry)
+            approved_list.append(article)
 
         else:
 

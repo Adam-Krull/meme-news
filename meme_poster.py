@@ -66,24 +66,30 @@ def upload_meme(auth_api, filepath):
     return media_string
 
 #Add hashtags to the headline to complete my tweet text content
-def curate_content(headline):
+def curate_content(title, source, link, rng):
 
-    """Takes in the news headline as a string.
+    """Takes in the news article information.
     
     Returns a string with additional hashtags."""
 
-    hashtags = ' #currentevents #memenews #ai'
+    poss_tags = ['#currentevents', '#breakingnews', '#happeningnow', '#momentsago']
 
-    return headline + hashtags
+    tag_pos = rng.integers(low=0, high=3, size=1)[0]
+
+    hashtags = f'#memenews {poss_tags[tag_pos]}'
+
+    full_string = f'{source} | {title} {hashtags}\n\n{link}'
+
+    return full_string
 
 #Post the content to X
-def create_tweet(auth_client, media_string, headline):
+def create_tweet(auth_client, media_string, content):
 
-    """Takes the authenticated client, the media string, and the headline.
+    """Takes the authenticated client, the media string, and the curated content.
     
     Posts a tweet to X with the content."""
 
-    response = auth_client.create_tweet(media_ids=media_string, text=headline)
+    response = auth_client.create_tweet(media_ids=media_string, text=content)
 
     print('Tweet created!')
 
@@ -94,7 +100,7 @@ def sleepy(rng):
     
     Sleeps for a random number of seconds between 10-20."""
 
-    seconds = rng.integers(low=10, high=20, size=1)[0]
+    seconds = rng.integers(low=15, high=30, size=1)[0]
 
     print(f'Sleeping for {seconds} seconds.')
 
@@ -121,13 +127,15 @@ def post_tweets(today=today, memes=approved):
 
         #Extract the two pieces of information
         filepath = meme['image']
-        headline = meme['headline']
+        title = meme['title']
+        source = meme['source']
+        link = meme['link']
 
         #Upload the meme to the media API endpoint
         media_string = upload_meme(media_auth, filepath)
 
         #Customize the tweet text
-        tweet_body = curate_content(headline)
+        tweet_body = curate_content(title, source, link, rng)
 
         #Create the tweet
         create_tweet(client_auth, media_string, tweet_body)
