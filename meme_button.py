@@ -125,7 +125,14 @@ def clean_content(content):
     
     try:
         
-        image, top, bottom = clean_content.split('\n\n')
+        #Create a list of elements in the returned content
+        content_list = clean_content.splitlines()
+
+        #Removes empty strings from the list if there were multiple newline characters
+        curated_list = list(filter(bool, content_list))
+
+        #Unpacks the list into three variables
+        image, top, bottom = curated_list[0], curated_list[1], curated_list[2]
     
         clean_dict = {'image': extract(image), 'top': extract(top), 'bottom': extract(bottom)}
                   
@@ -185,7 +192,7 @@ def get_meme_desc(articles):
             
         else:
               
-            print(f'Unable to generate meme for the following title: {article['title']}.')
+            print(f"Unable to generate meme for the following title: {article['title']}.")
 
             print('Response content looked like this:')
 
@@ -332,6 +339,12 @@ def meme_button(desc=descriptions):
         descriptions = get_meme_desc(titles)
     
     for i, desc in enumerate(descriptions):
+
+        if (i + 1) % 5 == 0:
+            
+            print(f'Feeling sleepy.')
+            
+            time.sleep(66)
         
         image = get_meme_image(desc['image'])
               
@@ -347,7 +360,7 @@ def meme_button(desc=descriptions):
 
                 meme_path = save_meme(meme, i + 1)
 
-                print(f'Meme created and saved at {meme_path}.')
+                print(f"Meme created and saved at {meme_path}.")
                 
             else:
                 
@@ -358,12 +371,6 @@ def meme_button(desc=descriptions):
         else:
               
             continue
-
-        if i % 5 == 0:
-            
-            print(f'Feeling sleepy.')
-            
-            time.sleep(66)
 
     print('Meme generation complete!')    
         
