@@ -119,7 +119,7 @@ def clean_content(content):
     
     Returns a dictionary containing: the image description, the top text, and the bottom text."""
     
-    clean_content = re.sub(r"[^a-zA-Z0-9':\s\.!]", "", content)
+    clean_content = re.sub(r"[^a-zA-Z0-9'-:\s\.!]", "", content)
     
     clean_content = re.sub(r"Donald Trump", "an orange man", clean_content)
     
